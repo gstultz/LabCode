@@ -34,7 +34,9 @@ def file_transfer():
 
 
 def gen_files(folder):
-    """Generate files that match a given filename pattern."""
+    """
+    List all files under the folder.
+    """
     assert os.path.isdir(folder), 'Folder does not exist'
     log.trace('Folder located successfully: {}'.format(folder))
     for root, dirs, files in os.walk(folder):
@@ -43,6 +45,9 @@ def gen_files(folder):
 
 
 def create_folder(filename, origin=True):
+    """
+    Create src and dest folder if not exist, and return the folder path.
+    """
     technique_dict = {'a': 'Auger', 'e': 'EELS', 'r': 'RGA', 'c': 'TDS',
                       'd': 'TDS'}
     month_dict = generate_month_dict()
@@ -75,6 +80,9 @@ def generate_month_dict():
 
 
 def init_logging(filename=None):
+    """
+    Initialize logging for this module.
+    """
     level = logbook.TRACE
     if filename:
         logbook.TimedRotatingFileHandler(
