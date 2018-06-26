@@ -16,12 +16,9 @@ dest_folder = os.path.join(os.path.expanduser('~'),
 log = logbook.Logger('Program')
 
 
-def main():
-    clean_files(origin_folder)
-
-
-def clean_files(folder):
-    for filename, filepath in gen_files(folder):
+def file_transfer():
+    init_logging()
+    for filename, filepath in gen_files(origin_folder):
         match = re.search(r'^\w{3}\d{2}_\d{2}\.[arecdARECD]\d{2}$', filename)
         if match:
             origin_new_folder = create_folder(filename, origin=True)
@@ -95,5 +92,4 @@ def init_logging(filename=None):
 
 
 if __name__ == '__main__':
-    init_logging()
-    main()
+    file_transfer()
