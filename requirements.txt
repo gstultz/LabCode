@@ -1,0 +1,8 @@
+logbook
+numpy
+jupyter
+pandas
+matplotlib
+scipy
+lmfit
+
