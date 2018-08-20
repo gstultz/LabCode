@@ -1,30 +1,13 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
-from numpy import loadtxt, where, maximum
-from lmfit.models import LinearModel, GaussianModel, LorentzianModel, VoigtModel
+from numpy import loadtxt, maximum
 import matplotlib.gridspec as gridspec
+from lmfit.models import (
+    LinearModel, GaussianModel, LorentzianModel, VoigtModel
+)
 
-
-def generate_month_dict():
-    """
-    Return a dictionary that maps month names to digital format.
-    """
-    keys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun',
-            'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-    values = ['01', '02', '03', '04', '05', '06',
-              '07', '08', '09', '10', '11', '12']
-    return dict(zip(keys, values))
-
-
-def index_of(arr, value):
-    """
-    Return the largest index of an element in an array that is smaller
-    than a given value. Array must be sorted.
-    """
-    if value < min(arr):
-        return 0
-    return max(where(arr <= value)[0])
+from .util import generate_month_dict, index_of
 
 
 class EELS:

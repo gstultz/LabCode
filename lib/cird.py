@@ -1,12 +1,13 @@
 import os
 import pandas as pd
-from numpy import exp
 import numpy as np
 from scipy.stats import linregress
 from scipy.integrate import quad
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
+
+from .util import generate_month_dict, biexp_decay
 
 
 class CIRD:
@@ -47,23 +48,24 @@ class CIRD:
 
         month_dict = generate_month_dict()
         month_folder = month_dict[self.filename[:3]] + '_' + self.filename[:3]
-        self.filepath = os.path.join(os.path.expanduser('~'),
-                                     'Dropbox (MIT)',
-                                     'littlemachine',
-                                     '20' + self.filename[6:8],
-                                     month_folder,
-                                     self.filename)
+        self.filepath = os.path.join(
+            os.path.expanduser('~'),
+            'Dropbox (MIT)',
+            'littlemachine',
+            '20' + self.filename[6:8],
+            month_folder,
+            self.filename
+        )
 
-        self.data = pd.read_csv(self.filepath,
-                                delim_whitespace=True,
-                                skipfooter=3,
-                                skiprows=3,
-                                names=["counts", "temp"],
-                                engine="python")
+        self.data = pd.read_csv(
+            self.filepath, delim_whitespace=True, skipfooter=3, skiprows=3,
+            names=["counts", "temp"], engine="python"
+        )
 
         self.data.drop('temp', axis=1, inplace=True)
         self.data["time"] = dwell_time * np.arange(len(self.data))
         self.dwell_time = dwell_time
+
         if show_plot:
             plt.figure(figsize=(10, 4))
             plt.plot(self.data["time"], self.data["counts"])
@@ -72,8 +74,8 @@ class CIRD:
             plt.grid()
             plt.show()
 
-    def level_background(self, npts=50, sensitivity=1.0, beam_start_time=np.nan,
-                         beam_stop_time=np.nan):
+    def level_background(self, npts=50, sensitivity=1.0,
+                         beam_start_time=np.nan, beam_stop_time=np.nan):
         """
         Level the CIRD plot,
         Parameters
@@ -96,6 +98,7 @@ class CIRD:
         Returns
         -------
         """
+
         if len(self.data) == 0:
             self.load_data()
 
@@ -126,34 +129,44 @@ class CIRD:
         self.data["counts_leveled"] = self.data["counts"] / sensitivity
 
         X = pd.concat([
-            self.data["time"][(self.index_beamstart-npts):self.index_beamstart],
-            self.data["time"][self.index_beamstop:self.index_beamstop+npts]
+            self.data["time"][
+                (self.index_beamstart-npts):self.index_beamstart
+            ],
+            self.data["time"][
+                self.index_beamstop:self.index_beamstop+npts
+            ]
         ])
         y = pd.concat([
             self.data["counts_leveled"][
-                (self.index_beamstart-npts):self.index_beamstart],
+                (self.index_beamstart-npts):self.index_beamstart
+            ],
             self.data["counts_leveled"][
-                self.index_beamstop:self.index_beamstop + npts]
+                self.index_beamstop:self.index_beamstop + npts
+            ]
         ])
 
         slope, intercept = linregress(X, y)[0:2]
-        self.data["counts_leveled"] = (self.data["counts_leveled"]
-                                       - self.data["time"] * slope - intercept)
+        self.data["counts_leveled"] = (
+            self.data["counts_leveled"] - self.data["time"] * slope - intercept
+        )
 
     def integrate_area(self):
         """
         Calculate the area under under the curve in CIRD plot, and smooth the
         leveled plot using savgol filter.
         """
+
         self.integrated_area = self.data["counts_leveled"].iloc[
             self.index_beamstart:self.index_beamstop].sum() * self.dwell_time
         self.data['counts_smoothed'] = self.data["counts_leveled"]
         self.data['counts_smoothed'].iloc[:self.index_beamstart] = \
             savgol_filter(
-                self.data['counts_leveled'].iloc[:self.index_beamstart], 51, 1)
+                self.data['counts_leveled'].iloc[:self.index_beamstart], 51, 1
+            )
         self.data['counts_smoothed'].iloc[self.index_beamstart:] = \
             savgol_filter(
-                self.data['counts_leveled'].iloc[self.index_beamstart:], 51, 1)
+                self.data['counts_leveled'].iloc[self.index_beamstart:], 51, 1
+            )
 
     def fit_area(self, area_high=False, show_plot=True):
         X = self.data["time"].iloc[self.index_beamstart:self.index_beamstop]
@@ -186,22 +199,8 @@ class CIRD:
     def export_data(self, destination_path, npts=100):
         df_output = self.data[self.index_beamstart - npts:].copy()
         df_output["time"] = df_output["time"] - df_output["time"].min()
-        df_output.columns = [self.filename + '_' + x for x in self.data.columns]
+        df_output.columns = [
+            self.filename + '_' + x for x in self.data.columns
+        ]
         df_output.to_csv(
             os.path.join(destination_path, self.filename), index=False)
-
-
-def generate_month_dict():
-    """
-    Return a dictionary that maps month names to digital format.
-    """
-    keys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun',
-            'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-    values = ['01', '02', '03', '04', '05', '06',
-              '07', '08', '09', '10', '11', '12']
-    return dict(zip(keys, values))
-
-
-def biexp_decay(x, a1, a2, b1, b2, c1, c2, d):
-    """Expression for bi-exponential decay"""
-    return a1 * exp(b1 * (x - c1)) + a2 * exp(b2 * (x - c2)) + d
