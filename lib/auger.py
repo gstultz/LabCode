@@ -7,6 +7,29 @@ from lmfit.models import LinearModel
 from collections import OrderedDict
 
 
+def __generate_filepath(self):
+    month_dict = generate_month_dict()
+    month_folder = month_dict[self.filename[:3]] + '_' + self.filename[:3]
+    try:
+        self.filepath = os.path.join(
+            os.path.expanduser('~'),
+            'Dropbox (MIT)',
+            'littlemachine',
+            '20' + filename[6:8],
+            month_folder,
+            self.filename,
+        )
+    except OSError:
+        filepath = os.path.join(
+            os.path.expanduser('~'),
+            'Dropbox (MIT)',
+            'littlemachine',
+            '20' + filename[6:8],
+            month_folder,
+            filename)
+
+
+
 def generate_month_dict():
     """
     Return a dictionary that maps month names to digital format.
@@ -103,12 +126,13 @@ class Auger:
         """
         month_dict = generate_month_dict()
         month_folder = month_dict[self.filename[:3]] + '_' + self.filename[:3]
-        self.filepath = os.path.join(os.path.expanduser('~'),
-                                     'Dropbox (MIT)',
-                                     'littlemachine',
-                                     '20' + self.filename[6:8],
-                                     month_folder,
-                                     self.filename)
+        self.filepath = os.path.join(
+            os.path.expanduser('~'),
+            'Dropbox (MIT)',
+            'littlemachine',
+            '20' + self.filename[6:8],
+            month_folder,
+            self.filename)
 
         # Check if the Auger file has been preprocessed.
         # If not, call the preprocess_Auger function.
