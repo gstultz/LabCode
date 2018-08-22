@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
-from numpy import where, exp
 import matplotlib.pyplot as plt
 import os
 from scipy.stats import linregress
 from scipy.signal import savgol_filter
 from lmfit.models import LinearModel, GaussianModel
+
+from .utils import generate_month_dict, index_of
 
 
 class TDS:
@@ -54,22 +55,25 @@ class TDS:
         Returns
         -------
         """
-
         month_dict = generate_month_dict()
         month_folder = month_dict[self.filename[:3]] + '_' + self.filename[:3]
-        self.filepath = os.path.join(os.path.expanduser('~'),
-                                     'Dropbox (MIT)',
-                                     'littlemachine',
-                                     '20' + self.filename[6:8],
-                                     month_folder,
-                                     self.filename)
+        self.filepath = os.path.join(
+            os.path.expanduser('~'),
+            'Dropbox (MIT)',
+            'littlemachine',
+            '20' + self.filename[6:8],
+            month_folder,
+            self.filename
+        )
 
-        self.data = pd.read_csv(self.filepath,
-                                delim_whitespace=True,
-                                skipfooter=3,
-                                skiprows=3,
-                                names=["counts_raw", "temp"],
-                                engine="python")
+        self.data = pd.read_csv(
+            self.filepath,
+            delim_whitespace=True,
+            skipfooter=3,
+            skiprows=3,
+            names=["counts_raw", "temp"],
+            engine="python"
+        )
         self.dwell_time = dwell_time
 
         if smoothed:
@@ -98,8 +102,8 @@ class TDS:
             plateau_pressure,
             show_plot=True):
         """
-        This method is associated with the sensitivity and used to calculate the
-        sensitivity factor, and plot it.
+        This method is associated with the sensitivity and used to calculate
+        the sensitivity factor, and plot it.
 
         Parameters
         ----------
@@ -160,12 +164,12 @@ class TDS:
         Parameters
         ----------
         method: int
-            if 1, the datapoints selected to fit the linear background was based
-            on those right before the initial spike and those at the end of the
-            spectrum.
+            if 1, the datapoints selected to fit the linear background was
+            based on those right before the initial spike and those at the end
+            of the spectrum.
             if 2, the datapoints are based on those after the intial peak (the
-            exact position is defined by start_temp) and those at the end of the
-            spectrum.
+            exact position is defined by start_temp) and those at the end of
+            the spectrum.
             Default is 1.
         start_temp : int
             Define the startpoint of the TDS spectrum in order to remove the
@@ -218,18 +222,20 @@ class TDS:
             ])
             slope, intercept = linregress(X, y)[0:2]
 
-            self.data["counts_leveled"] = (self.data["counts_raw"]
-                                           - slope * self.data["time"]
-                                           - intercept)
-            self.data["counts_leveled"] = (self.data["counts_leveled"]
-                                           / sensitivity)
+            self.data["counts_leveled"] = (
+                self.data["counts_raw"] - slope * self.data["time"] - intercept
+            )
+            self.data["counts_leveled"] = (
+                self.data["counts_leveled"] / sensitivity
+            )
 
         # Slice the raw spectrum using start_temp and total_npts.
         startpoint = index_of(self.data["temp"], start_temp) + 1
         if startpoint + total_npts > len(self.data):
             raise ValueError('Please modify the start_temp or total_npts!')
         self.data = self.data[
-            startpoint:startpoint + total_npts].reset_index(drop=True)
+            startpoint:startpoint + total_npts
+        ].reset_index(drop=True)
         self.data["time"] = self.dwell_time * np.arange(total_npts)
 
         # Method 2, Level the plot
@@ -243,11 +249,12 @@ class TDS:
                 self.data["counts_raw"][-linear_bg_end_npts:],
             ])
             slope, intercept = linregress(X, y)[0:2]
-            self.data["counts_leveled"] = (self.data["counts_raw"]
-                                           - slope * self.data["time"]
-                                           - intercept)
-            self.data["counts_leveled"] = (self.data["counts_leveled"]
-                                           / sensitivity)
+            self.data["counts_leveled"] = (
+                self.data["counts_raw"] - slope * self.data["time"] - intercept
+            )
+            self.data["counts_leveled"] = (
+                self.data["counts_leveled"] / sensitivity
+            )
         if show_plot:
             plt.figure(figsize=(8, 4))
             plt.plot(self.data["temp"], self.data["counts_leveled"])
@@ -276,17 +283,30 @@ class TDS:
         assert "counts_leveled" in background.data.columns, \
             'Data missing in background file, please provide valid background!'
 
-        self.data["counts_bg_subtracted"] = (self.data["counts_leveled"]
-                                             - background.data["counts_leveled"]
-                                             )
+        self.data["counts_bg_subtracted"] = (
+            self.data["counts_leveled"] - background.data["counts_leveled"]
+        )
+
         if show_plot:
             plt.figure(figsize=(8, 6))
-            plt.plot(self.data["temp"], self.data["counts_leveled"],
-                     linewidth=1, label="Sensitivity adjusted TDS")
-            plt.plot(background.data["temp"], background.data["counts_leveled"],
-                     linewidth=1, label="Background TDS")
-            plt.plot(self.data["temp"], self.data["counts_bg_subtracted"],
-                     linewidth=1, label="Final TDS")
+            plt.plot(
+                self.data["temp"],
+                self.data["counts_leveled"],
+                linewidth=1,
+                label="Sensitivity adjusted TDS"
+            )
+            plt.plot(
+                background.data["temp"],
+                background.data["counts_leveled"],
+                linewidth=1,
+                label="Background TDS"
+            )
+            plt.plot(
+                self.data["temp"],
+                self.data["counts_bg_subtracted"],
+                linewidth=1,
+                label="Final TDS"
+            )
             plt.legend()
             plt.ylabel('Counts [Hz]')
             plt.xlabel('Temperature [K]')
@@ -316,10 +336,12 @@ class TDS:
         low_ix = index_of(self.data["temp"], low_temp) + 1
         split_ix = index_of(self.data["temp"], split_temp) + 1
         high_ix = index_of(self.data["temp"], high_temp) + 1
-        self.area_low = (self.data["counts_leveled"][low_ix:split_ix].sum()
-                         * self.dwell_time)
-        self.area_high = (self.data["counts_leveled"][split_ix:high_ix].sum()
-                          * self.dwell_time)
+        self.area_low = (
+            self.data["counts_leveled"][low_ix:split_ix].sum()*self.dwell_time
+        )
+        self.area_high = (
+            self.data["counts_leveled"][split_ix:high_ix].sum()*self.dwell_time
+        )
 
     def fit_area(self, counts_to_use=1, show_report=False, show_plot=True):
         x = self.data["temp"]
@@ -373,31 +395,7 @@ class TDS:
     def export_data(self, destination_path):
         columns = [self.filename + '_' + x for x in self.data.columns]
         df_output = pd.DataFrame(self.data.values, columns=columns)
-        df_output.to_csv(os.path.join(destination_path, self.filename),
-                         index=False)
-
-
-def exp_decay(x, a, b, c):
-    """Expression for exponential decay"""
-    return a * exp(b * x) + c
-
-
-def generate_month_dict():
-    """
-    Return a dictionary that maps month names to digital format.
-    """
-    keys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun',
-            'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-    values = ['01', '02', '03', '04', '05', '06',
-              '07', '08', '09', '10', '11', '12']
-    return dict(zip(keys, values))
-
-
-def index_of(arr, value):
-    """
-    Return the largest index of an element in an array that is smaller
-    than a given value. Array must be sorted.
-    """
-    if value < min(arr):
-        return 0
-    return max(where(arr <= value)[0])
+        df_output.to_csv(
+            os.path.join(destination_path, self.filename),
+            index=False
+        )

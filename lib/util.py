@@ -50,3 +50,8 @@ def derivative_gaussian_Au(x, yita, amp, cen, wid):
     Return a derivative gaussian function for the Gold transition
     """
     return (-amp * yita * (x - cen)) * exp(-(x - cen)**2 / (2 * wid**2))
+
+
+def exp_decay(x, a, b, c):
+    """Expression for exponential decay"""
+    return a * exp(b * x) + c

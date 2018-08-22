@@ -29,30 +29,33 @@ class EELS:
         """
         month_dict = generate_month_dict()
         month_folder = month_dict[self.filename[:3]] + '_' + self.filename[:3]
-        self.filepath = os.path.join(os.path.expanduser('~'),
-                                     'Dropbox (MIT)',
-                                     'littlemachine',
-                                     '20' + self.filename[6:8],
-                                     month_folder,
-                                     self.filename)
+        self.filepath = os.path.join(
+            os.path.expanduser('~'),
+            'Dropbox (MIT)',
+            'littlemachine',
+            '20' + self.filename[6:8],
+            month_folder,
+            self.filename
+        )
 
         # Check if the EELS file has been preprocessed.
         # If not, call the preprocess_EELS function.
         if open(self.filepath, 'r').readline().split()[0] == 'IGOR':
-            print(
-                'EELS {} already preprocessed, loading data...'.format(
-                    self.filename))
+            print('EELS {} already preprocessed, loading data...'.format(
+                self.filename)
+            )
         else:
-            print(
-                'EELS {} not preprocessed, now preprocessing...'.format(
-                    self.filename))
+            print('EELS {} not preprocessed, now preprocessing...'.format(
+                self.filename)
+            )
             self.preprocess_EELS(self.filepath, ymax, spike_removal, overwrite)
 
-        self.data = loadtxt(self.filepath, comments=['E', 'X'],
-                            delimiter=',', skiprows=3)
+        self.data = loadtxt(
+            self.filepath, comments=['E', 'X'], delimiter=',', skiprows=3
+        )
         self.energy = self.data[:, 1]
         self.counts = self.data[:, 0]
-        self.nor_counts = self.counts/max(self.counts)*10000
+        self.nor_counts = self.counts / max(self.counts) * 10000
         print('Data loaded successfully!')
 
     @staticmethod
@@ -62,9 +65,8 @@ class EELS:
         Convert the EELS file into Igor text format, remove spike if requested.
         """
         meV_to_cm = 8.065
-        f = open(filepath, 'r')
-        data = f.readlines()
-        f.close()
+        with open(filepath, 'r') as f:
+            data = f.readlines()
         df = pd.read_csv(filepath, comment='X')
         df.iloc[-1].plot(ylim=(0, ymax), grid=True, figsize=(8, 6))
         if spike_removal:

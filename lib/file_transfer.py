@@ -4,14 +4,20 @@ import fnmatch
 import logbook
 import sys
 from shutil import copyfile
+from .utils import generate_month_dict
 
 
-origin_folder = os.path.join(os.path.expanduser('~'),
-                             'Dropbox (MIT)',
-                             'Little Machine Data')
-dest_folder = os.path.join(os.path.expanduser('~'),
-                           'Dropbox (MIT)',
-                           'littlemachine')
+origin_folder = os.path.join(
+    os.path.expanduser('~'),
+    'Dropbox (MIT)',
+    'Little Machine Data',
+)
+
+dest_folder = os.path.join(
+    os.path.expanduser('~'),
+    'Dropbox (MIT)',
+    'littlemachine',
+)
 
 log = logbook.Logger('Program')
 
@@ -48,35 +54,35 @@ def create_folder(filename, origin=True):
     """
     Create src and dest folder if not exist, and return the folder path.
     """
-    technique_dict = {'a': 'Auger', 'e': 'EELS', 'r': 'RGA', 'c': 'TDS',
-                      'd': 'TDS'}
+    technique_dict = {
+        'a': 'Auger',
+        'c': 'TDS',
+        'd': 'TDS',
+        'e': 'EELS',
+        'r': 'RGA',
+    }
     month_dict = generate_month_dict()
-    month_folder = month_dict[filename[:3].lower()] + '_' + filename[:3].lower()
+    month_folder = (
+        month_dict[filename[:3].lower()] + '_' + filename[:3].lower()
+    )
     technique_folder = technique_dict[filename[9].lower()]
     if origin:
-        folder = os.path.join(origin_folder,
-                              technique_folder,
-                              '20' + filename[6:8],
-                              month_folder)
+        folder = os.path.join(
+            origin_folder,
+            technique_folder,
+            '20' + filename[6:8],
+            month_folder
+        )
     else:
-        folder = os.path.join(dest_folder,
-                              '20' + filename[6:8],
-                              month_folder)
+        folder = os.path.join(
+            dest_folder,
+            '20' + filename[6:8],
+            month_folder
+        )
     if not os.path.isdir(folder):
         os.mkdir(folder)
         log.trace('Folder created: {}'.format(folder))
     return folder
-
-
-def generate_month_dict():
-    """
-    Return a dictionary that maps month names to digital format.
-    """
-    keys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun',
-            'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-    values = ['01', '02', '03', '04', '05', '06',
-              '07', '08', '09', '10', '11', '12']
-    return dict(zip(keys, values))
 
 
 def init_logging(filename=None):

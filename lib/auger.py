@@ -67,7 +67,8 @@ class Auger:
             'littlemachine',
             '20' + self.filename[6:8],
             month_folder,
-            self.filename)
+            self.filename
+        )
 
         # Check if the Auger file has been preprocessed.
         # If not, call the preprocess_Auger function.
