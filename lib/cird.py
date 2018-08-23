@@ -7,7 +7,7 @@ from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
 
-from .util import generate_month_dict, biexp_decay
+from .util import locate_filepath, biexp_decay
 
 
 class CIRD:
@@ -19,8 +19,8 @@ class CIRD:
     """
     def __init__(self, filename):
         self.filename = filename
+        self.filepath = locate_filepath(self.filename)
         self.data = pd.DataFrame()
-        self.filepath = None
         self.path = None
         self.dwell_time = None
         self.index_beamstart = None
@@ -45,18 +45,6 @@ class CIRD:
         Returns
         -------
         """
-
-        month_dict = generate_month_dict()
-        month_folder = month_dict[self.filename[:3]] + '_' + self.filename[:3]
-        self.filepath = os.path.join(
-            os.path.expanduser('~'),
-            'Dropbox (MIT)',
-            'littlemachine',
-            '20' + self.filename[6:8],
-            month_folder,
-            self.filename
-        )
-
         self.data = pd.read_csv(
             self.filepath, delim_whitespace=True, skipfooter=3, skiprows=3,
             names=["counts", "temp"], engine="python"

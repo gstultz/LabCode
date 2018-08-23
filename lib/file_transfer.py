@@ -4,7 +4,7 @@ import fnmatch
 import logbook
 import sys
 from shutil import copyfile
-from .utils import generate_month_dict
+from .util import generate_month_dict
 
 
 origin_folder = os.path.join(

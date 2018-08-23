@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from numpy import loadtxt, maximum
@@ -7,21 +6,7 @@ from lmfit.models import (
     LinearModel, GaussianModel, LorentzianModel, VoigtModel
 )
 
-from .util import generate_month_dict, index_of
-
-
-def locate_filepath(filename):
-    month_dict = generate_month_dict()
-    month_folder = month_dict[filename[:3]] + '_' + filename[:3]
-    filepath = os.path.join(
-        os.path.expanduser('~'),
-        'Dropbox (MIT)',
-        'littlemachine',
-        '20' + filename[6:8],
-        month_folder,
-        filename,
-    )
-    return filepath
+from .util import index_of, locate_filepath
 
 
 class EELS:

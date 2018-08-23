@@ -1,12 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import os
 from lmfit import Model
 from lmfit.models import LinearModel
 from collections import OrderedDict
 
 from .utils import (
-    generate_month_dict, index_of, derivative_gaussian, derivative_gaussian_Au
+    locate_filepath, index_of, derivative_gaussian, derivative_gaussian_Au,
 )
 
 
@@ -50,7 +49,7 @@ class Auger:
 
     def __init__(self, filename):
         self.filename = filename
-        self.filepath = None
+        self.filepath = locate_filepath(self.filename)
         self.data = OrderedDict()
         self.num_of_scan = 0
         self.output = {}
@@ -59,17 +58,6 @@ class Auger:
         """
         Load data to self.data while removing unrelated information.
         """
-        month_dict = generate_month_dict()
-        month_folder = month_dict[self.filename[:3]] + '_' + self.filename[:3]
-        self.filepath = os.path.join(
-            os.path.expanduser('~'),
-            'Dropbox (MIT)',
-            'littlemachine',
-            '20' + self.filename[6:8],
-            month_folder,
-            self.filename
-        )
-
         # Check if the Auger file has been preprocessed.
         # If not, call the preprocess_Auger function.
         if open(self.filepath, 'r').readline().split()[0] == 'IGOR':

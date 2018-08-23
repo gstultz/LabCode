@@ -1,5 +1,27 @@
+import os
 import numpy as np
 from numpy import exp, where, sqrt, pi
+
+
+def locate_filepath(filename):
+    """
+    Locate the data filepath.
+    Note:
+        MIT dropbox folder should be placed in the home directory.
+        OS independent.
+        Filepath is located through the datafile name.
+    """
+    month_dict = generate_month_dict()
+    month_folder = month_dict[filename[:3]] + '_' + filename[:3]
+    filepath = os.path.join(
+        os.path.expanduser('~'),
+        'Dropbox (MIT)',
+        'littlemachine',
+        '20' + filename[6:8],
+        month_folder,
+        filename,
+    )
+    return filepath
 
 
 def generate_month_dict():
