@@ -10,6 +10,20 @@ from lmfit.models import (
 from .util import generate_month_dict, index_of
 
 
+def locate_filepath(filename):
+    month_dict = generate_month_dict()
+    month_folder = month_dict[filename[:3]] + '_' + filename[:3]
+    filepath = os.path.join(
+        os.path.expanduser('~'),
+        'Dropbox (MIT)',
+        'littlemachine',
+        '20' + filename[6:8],
+        month_folder,
+        filename,
+    )
+    return filepath
+
+
 class EELS:
     """
     Class for processing EELS files.
@@ -21,23 +35,12 @@ class EELS:
 
     def __init__(self, filename):
         self.filename = filename
-        self.filepath = None
+        self.filepath = locate_filepath(self.filename)
 
     def load_data(self, ymax=200, spike_removal=False, overwrite=False):
         """
         Load data to self.data while removing unrelated information.
         """
-        month_dict = generate_month_dict()
-        month_folder = month_dict[self.filename[:3]] + '_' + self.filename[:3]
-        self.filepath = os.path.join(
-            os.path.expanduser('~'),
-            'Dropbox (MIT)',
-            'littlemachine',
-            '20' + self.filename[6:8],
-            month_folder,
-            self.filename
-        )
-
         # Check if the EELS file has been preprocessed.
         # If not, call the preprocess_EELS function.
         if open(self.filepath, 'r').readline().split()[0] == 'IGOR':
