@@ -1,10 +1,11 @@
+from collections import OrderedDict
+
 import numpy as np
 import matplotlib.pyplot as plt
 from lmfit import Model
 from lmfit.models import LinearModel
-from collections import OrderedDict
 
-from .utils import (
+from lib.util import (
     locate_filepath, index_of, derivative_gaussian, derivative_gaussian_Au,
 )
 

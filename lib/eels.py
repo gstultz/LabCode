@@ -1,12 +1,12 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from numpy import loadtxt, maximum
 import matplotlib.gridspec as gridspec
+from numpy import loadtxt, maximum
 from lmfit.models import (
     LinearModel, GaussianModel, LorentzianModel, VoigtModel
 )
 
-from .util import index_of, locate_filepath
+from lib.util import index_of, locate_filepath
 
 
 class EELS:

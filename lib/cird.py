@@ -7,7 +7,7 @@ from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
 
-from .util import locate_filepath, biexp_decay
+from lib.util import locate_filepath, biexp_decay
 
 
 class CIRD:

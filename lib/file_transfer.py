@@ -1,10 +1,12 @@
 import os
 import re
 import fnmatch
-import logbook
 import sys
 from shutil import copyfile
-from .util import generate_month_dict
+
+import logbook
+
+from lib.util import generate_month_dict
 
 
 origin_folder = os.path.join(

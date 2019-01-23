@@ -6,7 +6,7 @@ from scipy.stats import linregress
 from scipy.signal import savgol_filter
 from lmfit.models import LinearModel, GaussianModel
 
-from .util import locate_filepath, index_of
+from lib.util import locate_filepath, index_of
 
 
 class TDS:
